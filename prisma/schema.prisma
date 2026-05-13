@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  nama       String
+  role       Role     @default(PENGUNJUNG)
+  kelas      Kelas?
+  noInduk    String?
+  telepon    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  peminjaman Peminjaman[]
+
+  @@map("users")
+}
+
+model Buku {
+  id          Int      @id @default(autoincrement())
+  judul       String
+  penulis     String
+  penerbit    String
+  tahunTerbit Int
+  isbn        String?  @unique
+  stok        Int      @default(0)
+  gambar      String?
+  deskripsi   String?
+  kategori    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  peminjaman Peminjaman[]
+
+  @@map("buku")
+}
+
+model Peminjaman {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  bukuId        Int
+  tanggalPinjam DateTime @default(now())
+  tanggalKembali DateTime?
+  status        StatusPeminjaman @default(AKTIF)
+
+  user User @relation(fields: [userId], references: [id])
+  buku Buku @relation(fields: [bukuId], references: [id])
+
+  @@map("peminjaman")
+}
+
+enum Role {
+  ADMIN
+  PENGUNJUNG
+}
+
+enum Kelas {
+  KELAS_7
+  KELAS_8
+  KELAS_9
+  UMUM
+  GURU
+  KARYAWAN
+}
+
+enum StatusPeminjaman {
+  AKTIF
+  SELESAI
+  OVERDUE
+}
